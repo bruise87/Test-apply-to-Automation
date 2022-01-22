@@ -3,7 +3,7 @@ Feature: Entering to automatization
   Scenario: Entering to automatization
     And открыть сайт Rts-tender.ru
     And перейти в футере на 223 поставщик
-    And открыть расширенный поиск
+    And открыть страницу расширенного поиска
     And открыть настройки поиска
     And выбирать 615-ПП РФ
     And исключить совместные закупки

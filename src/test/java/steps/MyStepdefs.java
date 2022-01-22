@@ -2,27 +2,37 @@ package steps;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.apache.log4j.PropertyConfigurator;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import pages.AdvancedSearchPage;
 import pages.RtsTenderPage;
 import pages.Supplier223Page;
 
 import java.io.FileWriter;
-import java.io.IOException;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import static com.codeborne.selenide.Selenide.open;
 
 public class MyStepdefs {
     Logger logger223 = Logger.getLogger(String.valueOf(MyStepdefs.class));
-    private RtsTenderPage rtsTenderPage = new RtsTenderPage();
-    private Supplier223Page supplier223Page = new Supplier223Page();
-    private AdvancedSearchPage advancedSearchPage = new AdvancedSearchPage();
+    private final RtsTenderPage rtsTenderPage = new RtsTenderPage();
+    private final Supplier223Page supplier223Page = new Supplier223Page();
+    private final AdvancedSearchPage advancedSearchPage = new AdvancedSearchPage();
+
 
     @And("открыть сайт Rts-tender.ru")
     public void openPageRts() {
-        System.setProperty("webdriver.chrome.driver", "C:\\Users\\alf_m\\IdeaProjects\\223FZ\\chromedriver.exe");
+        PropertyConfigurator.configure("src\\test\\resources\\log4j.properties");
+        System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
         open("https://www.rts-tender.ru/");
+
     }
 
     @And("перейти в футере на 223 поставщик")
@@ -31,7 +41,7 @@ public class MyStepdefs {
 
     }
 
-    @And("открыть расширенный поиск")
+    @And("открыть страницу расширенного поиска")
     public void openSearch() {
         supplier223Page.clickSearchLink();
     }
@@ -76,12 +86,16 @@ public class MyStepdefs {
     public void startPriceChose() {
         try {
             FileWriter fileWriter = new FileWriter("log223.txt", true);
-            advancedSearchPage.clickOpenHelpWindow();
-            advancedSearchPage.clickCloseHelpWindow();
-            int cardNumber = advancedSearchPage.getCardsCount();
+            advancedSearchPage.openAndCloseHelpWindow();
 
+            int cardNumber = advancedSearchPage.getCardsCount();
+            int numbersOfCycles = 50;
             while (advancedSearchPage.checkButtonLoadMoreIsDisplayed()) {
                 advancedSearchPage.clickLoadMore();
+                numbersOfCycles--;
+                if (numbersOfCycles == 0) {
+                    throw new Exception("Превышено число итераций");
+                }
             }
 
             ElementsCollection purchaseCards = advancedSearchPage.getCards();
@@ -92,10 +106,9 @@ public class MyStepdefs {
                 fileWriter.flush();
                 logger223.info(logFor223Test);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
 
     }
 
